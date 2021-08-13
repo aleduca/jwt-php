@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Curso de JWT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <style type="text/css">
+    html, body {
+          font-family: 'Open Sans', sans-serif;
+    }
+
+    .btn-login{
+      background-color: aqua;
+    }
+
+    .btn-auth {
+      background-color: tomato;
+      color: white;
+    }
+  </style>
+
+  <div style="text-align: center;">
+    <div id="logged"></div>
+  </div>
+
+  <div style="display:flex; align-items: center;justify-content: center; height: 100vh;">
+
+    <div>
+      <form id="form">
+        <input type="text" name="email" value="qkoepp@tremblay.com">
+        <input type="text" name="password" value="123">
+        <button type="submit" class="btn-login">Login</button>
+      </form>
+    </div>
+    |
+    <div>
+      <button id="btn_check_auth" class="btn-auth">Verificar autenticação</button>
+    </div>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const form = document.querySelector("#form");
+      const btn_check_auth = document.querySelector("#btn_check_auth");
+
+      axios.defaults.baseURL = 'http://localhost:3000';
+
+      form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        try{
+          const formData = new FormData(event.target);
+
+          const {data} = await axios.post('login.php', formData);
+
+          sessionStorage.setItem('session', data);
+
+        }catch(error){
+          console.log(error);
+        }
+
+      })
+
+      btn_check_auth.addEventListener('click', async () => {
+        try{
+
+          const authSession = 'Bearer '+sessionStorage.getItem('session');
+
+          const {data} = await axios.get('auth.php',{
+            headers:{
+              "Authorization": authSession
+            }
+          })
+
+          console.log(data.email);
+        }catch(error){
+          if(error.response.data === 'EXPIRED'){
+            alert('Sessão expirou');
+          }
+          console.log(error);
+        }
+      })
+
+    </script>
+
+</body>
+</html>
